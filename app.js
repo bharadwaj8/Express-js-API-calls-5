@@ -110,10 +110,10 @@ app.get("/players/:playerId/matches", async (request, response) => {
 app.get("/matches/:matchId/players", async (request, response) => {
   const { matchId } = request.params;
   const query = `
-    SELECT DISTINCT pd.* FROM player_details pd join 
+    SELECT pd.* FROM player_details pd join 
     player_match_score pms on pd.player_id=pms.player_id
-    join match_details md on pms.match_id=md.match_id
-    WHERE pd.player_id=${matchId};`;
+     join match_details md on pms.match_id=md.match_id
+    WHERE md.match_id=${matchId};`;
   const dbResponse = await db.all(query);
   response.send(dbResponse.map((each) => convertPlayerDetailsToResponse(each)));
 });
@@ -128,11 +128,11 @@ app.get("/players/:playerId/playerScores", async (request, response) => {
     SUM(pms.sixes) as totalSixes FROM player_details pd
     join player_match_score pms on
     pd.player_id=pms.player_id
-    WHERE pms.player_id=${playerId}
-    GROUP BY pd.player_id;`;
+    WHERE pd.player_id=${playerId}
+    GROUP BY pd.player_id,pd.player_name;`;
 
-  const dbResponse = await db.all(query);
+  const dbResponse = await db.get(query);
   response.send(dbResponse);
 });
 
-module.exports = express;
+module.exports = app;
